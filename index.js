@@ -61,5 +61,5 @@ const loadMoreData = (loaded) => {
 }
 
 loadMoreData().then((data) => {
-  fs.writeFile('data.json', JSON.stringify(data, null, 4), (err) => err && console.log(`[ERROR]: `,err));
+  fs.writeFile(`${moment().toISOString()}-data.json`, JSON.stringify(data, null, 4), (err) => err && console.log(`[ERROR]: `,err));
 });
