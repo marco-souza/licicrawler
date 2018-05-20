@@ -1,4 +1,4 @@
-#! env node
+#! /usr/bin/env node
 const axios = require('axios');
 const fs = require('fs');
 const moment = require('moment');
