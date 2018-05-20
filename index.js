@@ -20,7 +20,7 @@ const checkKeywords = ({ objeto, data_entrega_proposta }) => {
   return keywords
     .map(word =>
       objeto.includes(word) // includes interested words
-      // && daysUntilClose > 5 // Not closed
+      && daysUntilClose > 5 // Not closed
     )
     .reduce((acc, cur) => acc || cur)
 }
