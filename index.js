@@ -3,7 +3,7 @@ const fs = require('fs');
 const moment = require('moment');
 const { filter, map } = require('lodash');
 
-let offset = 0;
+let offset = 1020000;
 let nextUrl = 0;
 
 const checkKeywords = ({ objeto, data_entrega_proposta }) => {
@@ -14,22 +14,25 @@ const checkKeywords = ({ objeto, data_entrega_proposta }) => {
   ];
 
   if (!objeto) return false;
+  const daysUntilClose = moment(data_entrega_proposta).diff(moment(), 'days');
+
+  console.log(daysUntilClose);
 
   return keywords
     .map(word =>
-      objeto.includes(word) && // includes interested words
-      moment(data_entrega_proposta).diff(moment(), 'days') > 5 // Not closed
+      objeto.includes(word) // includes interested words
+      && daysUntilClose > 5 // Not closed
     )
     .reduce((acc, cur) => acc || cur)
 }
 
-const loadMoreData = (loaded, c=5) => {
+const loadMoreData = (loaded) => {
 
   if (nextUrl === undefined) {
     console.log('No next url');
     return;
   }
-  const url = `http://compras.dados.gov.br${nextUrl.href || '/licitacoes/v1/licitacoes.json'}`;
+  const url = `http://compras.dados.gov.br${nextUrl.href || `/licitacoes/v1/licitacoes.json?offset=${offset}`}`;
 
   return axios
     .get(url)
@@ -47,9 +50,14 @@ const loadMoreData = (loaded, c=5) => {
         ];
 
         // Call loadmore or return result, if no next
-        return nextUrl === undefined || c < 5
+        return nextUrl === undefined
           ? new Promise((resolve, reject) => resolve(result))
-          : loadMoreData(result, c + 1)
+          : loadMoreData(result)
+      })
+      .catch(err => {
+        nextUrl = undefined;
+        // Call loadmore or return result, if no next
+        return new Promise((resolve, reject) => resolve(loaded))
       });
 }
 
