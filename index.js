@@ -6,7 +6,7 @@ const { filter, map } = require('lodash');
 let offset = 0;
 let nextUrl = 0;
 
-const checkKeywords = ({ objetom data_entrega_proposta }) => {
+const checkKeywords = ({ objeto, data_entrega_proposta }) => {
   const keywords = [
     'Tecnologia da Informática',
     'TI',
@@ -23,7 +23,7 @@ const checkKeywords = ({ objetom data_entrega_proposta }) => {
     .reduce((acc, cur) => acc || cur)
 }
 
-const loadMoreData = (loaded) => {
+const loadMoreData = (loaded, c=5) => {
 
   if (nextUrl === undefined) {
     console.log('No next url');
@@ -47,9 +47,9 @@ const loadMoreData = (loaded) => {
         ];
 
         // Call loadmore or return result, if no next
-        return nextUrl === undefined
+        return nextUrl === undefined || c < 5
           ? new Promise((resolve, reject) => resolve(result))
-          : loadMoreData(result)
+          : loadMoreData(result, c + 1)
       });
 }
 
