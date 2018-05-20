@@ -1,9 +1,10 @@
+#! env node
 const axios = require('axios');
 const fs = require('fs');
 const moment = require('moment');
-const { filter, map } = require('lodash');
+const { filter, map, orderBy } = require('lodash');
 
-let offset = 1020000;
+let offset = process.argv[2] || 0;
 let nextUrl = 0;
 
 const checkKeywords = ({ objeto, data_entrega_proposta }) => {
@@ -16,12 +17,10 @@ const checkKeywords = ({ objeto, data_entrega_proposta }) => {
   if (!objeto) return false;
   const daysUntilClose = moment(data_entrega_proposta).diff(moment(), 'days');
 
-  console.log(daysUntilClose);
-
   return keywords
     .map(word =>
       objeto.includes(word) // includes interested words
-      && daysUntilClose > 5 // Not closed
+      // && daysUntilClose > 5 // Not closed
     )
     .reduce((acc, cur) => acc || cur)
 }
@@ -40,14 +39,14 @@ const loadMoreData = (loaded) => {
     .then(data => {
         // save next url
         nextUrl = data._links.next;
-        console.log('nextUrl, url', nextUrl, url);
+        console.log('url', url);
 
         // get filtered data
-        const result = [
+        const result = orderBy([
           ...(loaded ? loaded : []),
           ...filter(data._embedded.licitacoes, checkKeywords)
-            .map(item => ({ objeto: item.objeto, link: item._links}))
-        ];
+            .map(({objeto, _links, data_entrega_proposta}) => ({ objeto, links: _links, data_entrega_proposta}))
+        ], ['data_entrega_proposta'], ['desc']);
 
         // Call loadmore or return result, if no next
         return nextUrl === undefined
