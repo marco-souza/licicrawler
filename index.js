@@ -1,11 +1,12 @@
 const axios = require('axios');
 const fs = require('fs');
+const moment = require('moment');
 const { filter, map } = require('lodash');
 
 let offset = 0;
 let nextUrl = 0;
 
-const checkKeywords = ({ objeto }) => {
+const checkKeywords = ({ objetom data_entrega_proposta }) => {
   const keywords = [
     'Tecnologia da Informática',
     'TI',
@@ -15,7 +16,10 @@ const checkKeywords = ({ objeto }) => {
   if (!objeto) return false;
 
   return keywords
-    .map(word => objeto.includes(word))
+    .map(word =>
+      objeto.includes(word) && // includes interested words
+      moment(data_entrega_proposta).diff(moment(), 'days') > 5 // Not closed
+    )
     .reduce((acc, cur) => acc || cur)
 }
 
